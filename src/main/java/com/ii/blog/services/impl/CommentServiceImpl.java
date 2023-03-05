@@ -3,6 +3,7 @@ import com.ii.blog.entities.Comment;
 import com.ii.blog.entities.Post;
 import com.ii.blog.exceptions.BlogApiException;
 import com.ii.blog.exceptions.ResourceNotFound;
+import com.ii.blog.mappers.CommentMapper;
 import com.ii.blog.payload.CommentDTO;
 import com.ii.blog.repositories.CommentRepository;
 import com.ii.blog.repositories.PostRepository;
@@ -11,62 +12,54 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final CommentMapper commentMapper;
     @Override
     public CommentDTO createComment(Long postId, CommentDTO commentDTO) {
-        Comment comment = mapToEntity(commentDTO);
+        Comment comment = commentMapper.mapToEntity(commentDTO);
         Post post = postRepository.findById(postId).orElseThrow(()-> new
                 ResourceNotFound("Post", "id",postId));
         comment.setPost(post);
         Comment newComment = commentRepository.save(comment);
-        return mapToDTO(newComment);
+        return commentMapper.mapToDTO(newComment);
     }
 
     @Override
     public List<CommentDTO> getAllCommentsByPostId(Long postId) {
         List<Comment> comments = commentRepository.findByPostId(postId);
-        return comments.stream().map(this::mapToDTO).toList();
+        return comments.stream().map(commentMapper::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     public CommentDTO getCommentById(Long postId, Long commentId) {
-        Comment comment = findById(postId, commentId);
-        return mapToDTO(comment);
+        Comment comment = findCommentById(postId, commentId);
+        return commentMapper.mapToDTO(comment);
     }
 
     @Override
     public CommentDTO updateCommentById(Long postId, Long commentId, CommentDTO commentDTO) {
-        Comment comment = findById(postId, commentId);
+        Comment comment = findCommentById(postId, commentId);
         comment.setName(commentDTO.getName());
         comment.setEmail(commentDTO.getEmail());
         comment.setBody(commentDTO.getBody());
         Comment updatedComment = commentRepository.save(comment);
-        return mapToDTO(updatedComment);
+        return commentMapper.mapToDTO(updatedComment);
     }
 
-    private Comment mapToEntity(CommentDTO commentDTO){
-        Comment comment = new Comment();
-        comment.setBody(commentDTO.getBody());
-        comment.setName(commentDTO.getName());
-        comment.setEmail(commentDTO.getEmail());
-        return comment;
+    @Override
+    public void deleteCommentById(Long postId, Long commentId) {
+        Comment existingComment = findCommentById(postId, commentId);
+        commentRepository.delete(existingComment);
     }
 
-    private CommentDTO mapToDTO(Comment comment){
-        CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setId(comment.getId());
-        commentDTO.setName(comment.getName());
-        commentDTO.setBody(comment.getBody());
-        commentDTO.setEmail(comment.getEmail());
-        return commentDTO;
-    }
 
-    private Comment findById(Long postId, Long commentId){
+    private Comment findCommentById(Long postId, Long commentId){
         Post post = postRepository.findById(postId).orElseThrow(()-> new
                 ResourceNotFound("Post","id",postId));
         Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new
