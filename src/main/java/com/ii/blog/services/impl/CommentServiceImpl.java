@@ -57,8 +57,6 @@ public class CommentServiceImpl implements CommentService {
         Comment existingComment = findCommentById(postId, commentId);
         commentRepository.delete(existingComment);
     }
-
-
     private Comment findCommentById(Long postId, Long commentId){
         Post post = postRepository.findById(postId).orElseThrow(()-> new
                 ResourceNotFound("Post","id",postId));

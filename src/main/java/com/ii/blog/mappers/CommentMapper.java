@@ -7,6 +7,10 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface CommentMapper {
 
+
     CommentDTO mapToDTO(Comment comment);
+
     Comment mapToEntity(CommentDTO commentDTO);
+
+
 }
