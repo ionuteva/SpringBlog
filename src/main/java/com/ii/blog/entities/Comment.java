@@ -1,13 +1,12 @@
 package com.ii.blog.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import org.springframework.context.annotation.EnableMBeanExport;
+import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
-
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -17,8 +16,10 @@ public class Comment {
     private String name;
     private String email;
     private String body;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="post_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Post.class)
+    @JoinColumn(name="post_id")
     private Post post;
+
+
 
 }
