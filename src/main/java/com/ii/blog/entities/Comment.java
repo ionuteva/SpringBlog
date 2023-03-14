@@ -17,9 +17,7 @@ public class Comment {
     private String email;
     private String body;
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = Post.class)
-    @JoinColumn(name="post_id")
+    @JoinColumn(name = "post_id")
     private Post post;
-
-
 
 }
